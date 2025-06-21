@@ -1,21 +1,17 @@
 {
   "name": "My VPN",
   "version": "1.0",
-  "manifest_version": 2,
-  "description": "VPN proxy with authentication",
-  "permissions": [
-    "proxy",
-    "tabs",
-    "storage",
-    "webRequest",
-    "webRequestBlocking",
-    "<all_urls>"
-  ],
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": true
+  "manifest_version": 3,
+  "description": "Secure VPN via Chrome extension",
+  "permissions": ["proxy", "storage", "scripting"],
+  "host_permissions": ["http://localhost:5001/*"],
+  "externally_connectable": {
+    "matches": ["http://localhost:3000/*"]
   },
-  "browser_action": {
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icon16.png",

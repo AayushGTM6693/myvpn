@@ -59,6 +59,14 @@ function setProxy(enabled, proxyConfig = null) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.setToken) {
+    chrome.storage.local.set({ token: request.setToken }, () => {
+      console.log("Token stored successfully in chrome.storage");
+      sendResponse({ status: "ok" });
+    });
+    return true;
+  }
+
   if (request.toggleProxy !== undefined) {
     if (request.toggleProxy) {
       fetchVpnConfig()

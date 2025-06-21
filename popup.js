@@ -4,6 +4,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const vpnStatus = document.getElementById("vpnStatus");
   const loader = document.getElementById("loader");
 
+  // ✅ Step 1: Check if token exists
+  chrome.storage.local.get(["token", "isEnabled"], (data) => {
+    const token = data.token;
+    const isEnabled = data.isEnabled;
+
+    if (!token) {
+      vpnStatus.textContent = "❌ Please log in via Web to use VPN";
+      connectBtn.style.display = "none";
+      disconnectBtn.style.display = "none";
+      return;
+    }
+
+    if (isEnabled) {
+      vpnStatus.textContent = "Status: Connected to Singapore";
+      connectBtn.style.display = "none";
+      disconnectBtn.style.display = "inline-block";
+    } else {
+      vpnStatus.textContent = "Status: Disconnected";
+      connectBtn.style.display = "inline-block";
+      disconnectBtn.style.display = "none";
+    }
+  });
+
+  // ✅ Step 2: Connect VPN
   connectBtn.onclick = () => {
     loader.style.display = "block";
     chrome.runtime.sendMessage({ toggleProxy: true }, (response) => {
@@ -18,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  // ✅ Step 3: Disconnect VPN
   disconnectBtn.onclick = () => {
     loader.style.display = "block";
     chrome.runtime.sendMessage({ toggleProxy: false }, (response) => {
@@ -27,14 +52,4 @@ document.addEventListener("DOMContentLoaded", () => {
       disconnectBtn.style.display = "none";
     });
   };
-
-  chrome.storage.local.get("isEnabled", (data) => {
-    if (data.isEnabled) {
-      vpnStatus.textContent = "Status: Connected to Singapore";
-      connectBtn.style.display = "none";
-      disconnectBtn.style.display = "inline-block";
-    } else {
-      vpnStatus.textContent = "Status: Disconnected";
-    }
-  });
 });
