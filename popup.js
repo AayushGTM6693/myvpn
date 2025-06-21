@@ -8,9 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     loader.style.display = "block";
     chrome.runtime.sendMessage({ toggleProxy: true }, (response) => {
       loader.style.display = "none";
-      vpnStatus.textContent = "Status: Connected to Singapore";
-      connectBtn.style.display = "none";
-      disconnectBtn.style.display = "inline-block";
+      if (response.status === "ok") {
+        vpnStatus.textContent = "Status: Connected to Singapore";
+        connectBtn.style.display = "none";
+        disconnectBtn.style.display = "inline-block";
+      } else {
+        vpnStatus.textContent = "❌ Failed: " + response.message;
+      }
     });
   };
 

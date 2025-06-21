@@ -1,11 +1,41 @@
-let isEnabled = false; // Current proxy status
+let isEnabled = false;
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ isEnabled: false }); // Set initial state OFF
+  chrome.storage.local.set({ isEnabled: false });
 });
 
-function setProxy(enabled) {
-  if (enabled) {
+async function fetchVpnConfig() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get("token", async (data) => {
+      if (!data.token) {
+        reject("No token found");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5001/api/vpn-access", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+
+        if (!res.ok) {
+          reject("Unauthorized or failed to fetch config");
+          return;
+        }
+
+        const config = await res.json();
+        resolve(config.socks5);
+      } catch (error) {
+        reject("Network error");
+      }
+    });
+  });
+}
+
+function setProxy(enabled, proxyConfig = null) {
+  if (enabled && proxyConfig) {
     chrome.proxy.settings.set(
       {
         value: {
@@ -13,10 +43,10 @@ function setProxy(enabled) {
           rules: {
             singleProxy: {
               scheme: "socks5",
-              host: " 165.22.110.253",
-              port: 1080, //  SOCKS port
+              host: proxyConfig.host,
+              port: parseInt(proxyConfig.port),
             },
-            bypassList: ["<local>"], // Local addresses won’t go through proxy
+            bypassList: ["<local>"],
           },
         },
         scope: "regular",
@@ -30,9 +60,25 @@ function setProxy(enabled) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.toggleProxy !== undefined) {
-    isEnabled = request.toggleProxy;
-    setProxy(isEnabled);
-    chrome.storage.local.set({ isEnabled });
-    sendResponse({ status: "ok" });
+    if (request.toggleProxy) {
+      fetchVpnConfig()
+        .then((config) => {
+          isEnabled = true;
+          setProxy(true, config);
+          chrome.storage.local.set({ isEnabled });
+          sendResponse({ status: "ok" });
+        })
+        .catch((err) => {
+          console.error("VPN Config Fetch Error:", err);
+          sendResponse({ status: "error", message: err });
+        });
+    } else {
+      isEnabled = false;
+      setProxy(false);
+      chrome.storage.local.set({ isEnabled });
+      sendResponse({ status: "ok" });
+    }
+
+    return true; // Required for async sendResponse
   }
 });
