@@ -35,6 +35,7 @@ async function fetchVpnConfig() {
 }
 
 function setProxy(enabled, proxyConfig = null) {
+  console.log("⚙️ Setting proxy:", enabled, proxyConfig); // log
   if (enabled && proxyConfig) {
     chrome.proxy.settings.set(
       {
