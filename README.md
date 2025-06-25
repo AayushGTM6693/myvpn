@@ -53,6 +53,8 @@ Since it's still in early stages, install it manually as follows:
 
 ## 🚀 Usage Instructions
 
+
+0. First  **"Load unpacked"** and the icon should appear on the browser. Click ( Click here to signin)
 1. **Go to** [https://my-vpn-server.vercel.app](https://my-vpn-server.vercel.app) and create an account.
 2. Log in using your email and password.
 3. Your browser will send the JWT token to the extension.
