@@ -1,12 +1,12 @@
 {
-  "name": "My VPN",
+  "name": "My Singapore VPN – Secure & Free",
   "version": "1.0",
   "manifest_version": 3,
-  "description": "Secure VPN via Chrome extension",
+  "description": "Secure VPN connection to Singapore via this lightweight Chrome extension.",
   "permissions": ["proxy", "storage", "scripting"],
   "host_permissions": ["https://my-vpn-server-z5f0.onrender.com/*"],
   "externally_connectable": {
-    "matches": ["http://localhost:3000/*", "https://my-vpn-server.vercel.app/*"]
+    "matches": ["https://my-vpn-server.vercel.app/*"]
   },
   "background": {
     "service_worker": "background.js"

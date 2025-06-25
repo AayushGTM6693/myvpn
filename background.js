@@ -41,7 +41,6 @@ async function fetchVpnConfig() {
 
 // Function to enable or disable proxy
 function setProxy(enabled, proxyConfig = null) {
-  console.log("⚙️ Setting proxy:", enabled, proxyConfig);
   if (enabled && proxyConfig) {
     chrome.proxy.settings.set(
       {
@@ -70,8 +69,6 @@ function setProxy(enabled, proxyConfig = null) {
 ////////////////////////////////////////////////////////////
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("🔁 Internal message received:", request);
-
   if (request.toggleProxy !== undefined) {
     if (request.toggleProxy) {
       fetchVpnConfig()
@@ -101,11 +98,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 chrome.runtime.onMessageExternal.addListener(
   (request, sender, sendResponse) => {
-    console.log("🌐 External message received:", request);
-
     if (request.setToken) {
       chrome.storage.local.set({ token: request.setToken }, () => {
-        console.log("✅ Token stored from external web");
         sendResponse({ status: "ok" });
       });
       return true;
