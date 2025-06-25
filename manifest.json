@@ -4,9 +4,9 @@
   "manifest_version": 3,
   "description": "Secure VPN via Chrome extension",
   "permissions": ["proxy", "storage", "scripting"],
-  "host_permissions": ["http://localhost:5001/*"],
+  "host_permissions": ["https://my-vpn-server-z5f0.onrender.com/*"],
   "externally_connectable": {
-    "matches": ["http://localhost:3000/*"]
+    "matches": ["http://localhost:3000/*", "https://my-vpn-server.vercel.app/*"]
   },
   "background": {
     "service_worker": "background.js"

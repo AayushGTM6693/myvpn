@@ -1,9 +1,11 @@
 let isEnabled = false;
 
+// Set default VPN state on install
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ isEnabled: false });
 });
 
+// Function to fetch VPN proxy config from backend
 async function fetchVpnConfig() {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get("token", async (data) => {
@@ -13,12 +15,15 @@ async function fetchVpnConfig() {
       }
 
       try {
-        const res = await fetch("http://localhost:5001/api/vpn-access", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-          },
-        });
+        const res = await fetch(
+          "https://my-vpn-server-z5f0.onrender.com/api/vpn-access",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
           reject("Unauthorized or failed to fetch config");
@@ -26,7 +31,7 @@ async function fetchVpnConfig() {
         }
 
         const config = await res.json();
-        resolve(config.socks5);
+        resolve(config.socks5); // only pass SOCKS5 proxy part
       } catch (error) {
         reject("Network error");
       }
@@ -34,8 +39,9 @@ async function fetchVpnConfig() {
   });
 }
 
+// Function to enable or disable proxy
 function setProxy(enabled, proxyConfig = null) {
-  console.log("⚙️ Setting proxy:", enabled, proxyConfig); // log
+  console.log("⚙️ Setting proxy:", enabled, proxyConfig);
   if (enabled && proxyConfig) {
     chrome.proxy.settings.set(
       {
@@ -59,14 +65,12 @@ function setProxy(enabled, proxyConfig = null) {
   }
 }
 
+////////////////////////////////////////////////////////////
+// 🟢 INTERNAL EXTENSION MESSAGES (popup.js etc)
+////////////////////////////////////////////////////////////
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.setToken) {
-    chrome.storage.local.set({ token: request.setToken }, () => {
-      console.log("Token stored successfully in chrome.storage");
-      sendResponse({ status: "ok" });
-    });
-    return true;
-  }
+  console.log("🔁 Internal message received:", request);
 
   if (request.toggleProxy !== undefined) {
     if (request.toggleProxy) {
@@ -87,7 +91,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.storage.local.set({ isEnabled });
       sendResponse({ status: "ok" });
     }
-
-    return true; // Required for async sendResponse
+    return true; // Important for async response
   }
 });
+
+////////////////////////////////////////////////////////////
+// 🌐 EXTERNAL MESSAGES (web UI from Vercel, localhost etc)
+////////////////////////////////////////////////////////////
+
+chrome.runtime.onMessageExternal.addListener(
+  (request, sender, sendResponse) => {
+    console.log("🌐 External message received:", request);
+
+    if (request.setToken) {
+      chrome.storage.local.set({ token: request.setToken }, () => {
+        console.log("✅ Token stored from external web");
+        sendResponse({ status: "ok" });
+      });
+      return true;
+    }
+  }
+);

@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const disconnectBtn = document.getElementById("disconnectBtn");
   const vpnStatus = document.getElementById("vpnStatus");
   const loader = document.getElementById("loader");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
 
   // ✅ Step 1: Check if token exists
   chrome.storage.local.get(["token", "isEnabled"], (data) => {
@@ -13,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
       vpnStatus.textContent = "❌ Please log in via Web to use VPN";
       connectBtn.style.display = "none";
       disconnectBtn.style.display = "none";
+      loginBtn.style.display = "inline-block";
+
+      loginBtn.onclick = () => {
+        chrome.tabs.create({
+          url: "https://my-vpn-server.vercel.app/signup",
+        });
+      };
+
       return;
     }
 
@@ -25,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       connectBtn.style.display = "inline-block";
       disconnectBtn.style.display = "none";
     }
+    logoutBtn.style.display = "inline-block";
   });
 
   // ✅ Step 2: Connect VPN
@@ -53,3 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 });
+
+logoutBtn.onclick = () => {
+  chrome.storage.local.remove(["token", "isEnabled"], () => {
+    vpnStatus.textContent = "✅ Logged out successfully";
+    connectBtn.style.display = "none";
+    disconnectBtn.style.display = "none";
+    logoutBtn.style.display = "none";
+  });
+};
